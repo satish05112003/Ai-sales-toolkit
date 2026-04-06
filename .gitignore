@@ -1,26 +1,34 @@
+# AI Sales Toolkit — Ignored Files
+
+# Environment & Secrets
 .env
+.env.*
+!.env.example
+
+# Virtual Environments
 venv/
-pycache/
-*/__pycache__/
-*.pyc
-node_modules/
-.storyboard_outputs/
+env/
+.venv/
+Scripts/
+Include/
+Lib/
+
+# Build & Run Artifacts
+storyboard_outputs/
+outputs/
+logs/
 *.mp4
 *.pptx
 *.log
-.DS_Store
+
+# Python Cache
+__pycache__/
+*.pyc
 *.pyo
 *.pyd
-.Python
-env/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
+
+# IDEs & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
