@@ -1,71 +1,78 @@
-AI Sales Toolkit
+# AI Sales Toolkit
 
 AI Sales Toolkit is a dual-system application that combines emotion-aware speech synthesis and AI-driven visual storytelling. It enables users to generate expressive voice outputs and convert ideas into structured visual presentations.
 
-⸻
+---
 
-Overview
+## Overview
 
 This repository contains two independent but complementary systems:
-	•	Empathy Engine (Task 1)
-An NLP-based system that detects emotions in text and maps them to voice parameters for expressive speech generation.
-	•	Pitch Visualizer (Task 2)
-A pipeline that converts textual input into storyboard visuals and exports them as PowerPoint presentations and video files.
 
-⸻
+- **Empathy Engine (Task 1)**  
+  An NLP-based system that detects emotions in text and maps them to voice parameters for expressive speech generation.
 
-Repository Structure
+- **Pitch Visualizer (Task 2)**  
+  A system that converts textual input into storyboard visuals and exports them as PowerPoint presentations and video files.
+
+---
+
+## Repository Structure
 
 AI-Sales-Toolkit/
 ├── empathy-engine/
 ├── pitch-visualizer/
 └── README.md
 
+---
 
-⸻
+# Task 1: Empathy Engine
 
-Task 1: Empathy Engine
+## Description
 
-Description
+The Empathy Engine enhances traditional text-to-speech systems by incorporating emotional context. It processes input text, identifies the underlying emotion, and adjusts speech characteristics accordingly.
 
-The Empathy Engine is designed to enhance text-to-speech systems by incorporating emotional context. It processes input text, identifies the underlying emotion, and adjusts speech characteristics accordingly.
+---
 
-Key Features
-	•	Emotion classification using NLP models
-	•	Dynamic voice parameter tuning (rate, volume)
-	•	Support for multiple emotional tones
-	•	Improved speech realism over standard TTS
+## Key Features
 
-⸻
+- Emotion classification using NLP models  
+- Dynamic voice parameter tuning (rate, volume)  
+- Support for multiple emotional tones  
+- Improved speech realism  
 
-Design Decisions
+---
 
-Emotion Detection
-The system uses a pre-trained transformer-based model to classify text into emotion categories such as happy, sad, angry, and neutral. This allows accurate detection of user intent.
+## Design Decisions
 
-Emotion-to-Voice Mapping
-Each emotion is mapped to specific speech parameters:
+### Emotion Detection
 
-Emotion	Speech Rate	Volume	Purpose
-Happy	High	High	Convey energy and positivity
-Sad	Low	Low	Convey empathy and seriousness
-Angry	High	High	Convey urgency and intensity
-Neutral	Normal	Normal	Informational tone
+A transformer-based NLP model is used to classify text into emotions such as happy, sad, angry, and neutral.
 
-Rationale
-Human communication relies heavily on tone and pacing. These mappings replicate natural speech behavior, improving listener engagement and clarity.
+### Emotion-to-Voice Mapping
 
-⸻
+| Emotion  | Speech Rate | Volume | Purpose |
+|----------|------------|--------|--------|
+| Happy    | High       | High   | Energy and excitement |
+| Sad      | Low        | Low    | Empathy and seriousness |
+| Angry    | High       | High   | Urgency and intensity |
+| Neutral  | Normal     | Normal | Informational tone |
 
-Setup and Execution
+### Rationale
 
+These mappings replicate natural human speech behavior, improving engagement and clarity.
+
+---
+
+## Setup and Run
+
+```bash
 cd empathy-engine
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
 
-Access the application at:
+Open:
 http://localhost:8000
 
 ⸻
@@ -74,21 +81,13 @@ Task 2: Pitch Visualizer
 
 Description
 
-Pitch Visualizer transforms textual narratives into visual storyboards. It generates images for each scene and supports exporting outputs as PowerPoint presentations and video files.
+Pitch Visualizer converts textual narratives into storyboard visuals. It generates images for each scene and allows exporting results as PowerPoint and video files.
 
 ⸻
 
-Pipeline
+Workflow
 
-Text Input
-   ↓
-Scene Segmentation
-   ↓
-Prompt Enhancement
-   ↓
-Image Generation
-   ↓
-PPT Export / Video Export
+Text → Scenes → Prompt Enhancement → Image Generation → PPT → Video
 
 
 ⸻
@@ -96,73 +95,86 @@ PPT Export / Video Export
 Key Features
 	•	Automatic scene segmentation
 	•	AI-based image generation
-	•	Prompt enhancement for improved visuals
-	•	Export to PPT (slide per scene)
-	•	Export to MP4 video
+	•	Prompt enhancement for better visuals
+	•	PPT export (slide per scene)
+	•	Video export (slideshow)
 	•	Sequential processing for stability
 
 ⸻
 
 Design Decisions
 
-Prompt Engineering
-Raw text is not directly passed to the image generator. Instead, prompts are enhanced using structured descriptors.
+Prompt Engineering Strategy
 
-Prompt Enhancement Strategy
+Raw text is enhanced before being sent to the image generator.
+
+Prompt Enhancement
+
 Each prompt includes:
-	•	Composition details (camera angle, framing)
-	•	Lighting conditions (cinematic, dramatic, soft)
-	•	Quality attributes (high resolution, detailed textures)
+	•	Cinematic composition
+	•	Lighting details
+	•	Camera effects
+	•	High-quality rendering instructions
 
 Rationale
-Enhanced prompts ensure consistent, high-quality outputs and reduce randomness in generated images.
+
+This ensures consistent, high-quality, and professional outputs.
 
 ⸻
 
-Setup and Execution
+Setup and Run
 
 cd pitch-visualizer
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 
-Create a .env file (do not commit):
+Environment Variables
+
+Create a .env file:
 
 GOOGLE_API_KEY=your_api_key
 
-Install FFmpeg and ensure it is available in PATH.
+Install FFmpeg
 
-Run the server:
+Verify installation:
+
+ffmpeg -version
+
+Run Server
 
 uvicorn main:app --reload --port 8000
 
-Access:
+Open:
 http://localhost:8000
 
 ⸻
 
 System Architecture
 
-The system follows a modular pipeline:
-	•	Input Layer: Accepts user text
-	•	Processing Layer:
-	•	Emotion detection (Task 1)
-	•	Scene segmentation (Task 2)
-	•	Generation Layer:
-	•	Voice synthesis
-	•	Image generation
-	•	Export Layer:
-	•	PowerPoint generation
-	•	Video rendering
+User Input
+   ↓
+Processing Layer
+   ├── Emotion Detection (Task 1)
+   └── Scene Segmentation (Task 2)
+   ↓
+Generation Layer
+   ├── Voice Output
+   └── Image Generation
+   ↓
+Export Layer
+   ├── PPT Export
+   └── Video Export
+
 
 ⸻
 
-Technology Stack
+Tech Stack
 	•	Python
 	•	FastAPI
 	•	HTML, CSS, JavaScript
-	•	Transformers (NLP models)
-	•	External image generation APIs
+	•	Transformers (NLP)
+	•	Image generation APIs
 	•	python-pptx
 	•	FFmpeg
 
@@ -173,26 +185,33 @@ Installation (Combined)
 git clone https://github.com/satish05112003/Ai-sales-toolkit.git
 cd Ai-sales-toolkit
 
-Set up each module independently (recommended).
+Set up each project separately.
 
 ⸻
 
 Usage
 
-Empathy Engine
-	•	Provide text input
-	•	System detects emotion
-	•	Outputs expressive speech
+Task 1
+	•	Input text
+	•	Detect emotion
+	•	Generate expressive speech
 
-Pitch Visualizer
-	•	Provide narrative input
-	•	System generates storyboard
-	•	Download outputs as PPT or video
+Task 2
+	•	Input story
+	•	Generate storyboard
+	•	Download PPT or video
 
 ⸻
 
 Troubleshooting
-	•	Ensure dependencies are installed
-	•	Verify FFmpeg installation for video export
-	•	Check API keys in .env
-	•	Increase delay if API rate limits occur
+	•	Install required dependencies
+	•	Ensure FFmpeg is installed
+	•	Check .env file for API keys
+	•	Increase delay if rate limits occur
+
+⸻
+
+
+👉 demo GIF  
+
+Just say 👍
