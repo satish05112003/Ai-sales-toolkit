@@ -1,27 +1,32 @@
 # AI Sales Toolkit
 
-AI Sales Toolkit is a dual-system application that combines emotion-aware speech synthesis and AI-driven visual storytelling. It enables users to generate expressive voice outputs and convert ideas into structured visual presentations.
+[![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?logo=fastapi)](https://fastapi.tiangolo.com/)
+
+AI Sales Toolkit is a dual-system AI application designed to improve communication and storytelling. It combines emotion-aware speech generation with AI-powered visual storytelling.
 
 ---
 
 ## Overview
 
-This repository contains two independent but complementary systems:
+This repository contains two main systems:
 
-- **Empathy Engine (Task 1)**  
-  An NLP-based system that detects emotions in text and maps them to voice parameters for expressive speech generation.
+### Task 1: Empathy Engine
+An AI system that detects emotions in text and adjusts voice output accordingly.
 
-- **Pitch Visualizer (Task 2)**  
-  A system that converts textual input into storyboard visuals and exports them as PowerPoint presentations and video files.
+### Task 2: Pitch Visualizer
+A system that converts text into storyboard visuals and exports them as PowerPoint presentations and videos.
 
 ---
 
 ## Repository Structure
 
+```
 AI-Sales-Toolkit/
 ├── empathy-engine/
 ├── pitch-visualizer/
 └── README.md
+```
 
 ---
 
@@ -29,37 +34,45 @@ AI-Sales-Toolkit/
 
 ## Description
 
-The Empathy Engine enhances traditional text-to-speech systems by incorporating emotional context. It processes input text, identifies the underlying emotion, and adjusts speech characteristics accordingly.
+Empathy Engine enhances traditional text-to-speech systems by adding emotional intelligence. It analyzes text input and modifies voice parameters to match the detected emotion.
 
 ---
 
-## Key Features
+## Features
 
-- Emotion classification using NLP models  
-- Dynamic voice parameter tuning (rate, volume)  
-- Support for multiple emotional tones  
-- Improved speech realism  
+- Emotion detection using NLP models  
+- Dynamic voice parameter adjustment (speed and volume)  
+- Multiple emotion handling  
+- Improved natural speech output  
 
 ---
 
-## Design Decisions
+## Design Choices (Important)
 
 ### Emotion Detection
 
-A transformer-based NLP model is used to classify text into emotions such as happy, sad, angry, and neutral.
+A transformer-based NLP model is used to classify text into emotions such as:
+- happy
+- sad
+- angry
+- neutral
 
-### Emotion-to-Voice Mapping
+### Emotion to Voice Mapping
 
-| Emotion  | Speech Rate | Volume | Purpose |
-|----------|------------|--------|--------|
-| Happy    | High       | High   | Energy and excitement |
-| Sad      | Low        | Low    | Empathy and seriousness |
-| Angry    | High       | High   | Urgency and intensity |
-| Neutral  | Normal     | Normal | Informational tone |
+| Emotion | Speech Rate | Volume | Purpose |
+|--------|------------|--------|--------|
+| Happy  | High       | High   | Energy and confidence |
+| Sad    | Low        | Low    | Empathy and seriousness |
+| Angry  | High       | High   | Urgency and intensity |
+| Neutral| Normal     | Normal | Informational tone |
 
-### Rationale
+### Reasoning
 
-These mappings replicate natural human speech behavior, improving engagement and clarity.
+These mappings are based on common human speech patterns:
+- Faster and louder speech expresses excitement  
+- Slower and softer speech expresses seriousness  
+
+This improves listener engagement and realism.
 
 ---
 
@@ -71,87 +84,110 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 python main.py
+```
 
-Open:
+Open in browser:
 http://localhost:8000
 
-⸻
+---
 
-Task 2: Pitch Visualizer
+# Task 2: Pitch Visualizer
 
-Description
+## Description
 
-Pitch Visualizer converts textual narratives into storyboard visuals. It generates images for each scene and allows exporting results as PowerPoint and video files.
+Pitch Visualizer converts text into visual storyboards. It generates images for each scene and allows exporting results as PowerPoint and video files.
 
-⸻
+---
 
-Workflow
+## Capabilities
 
-Text → Scenes → Prompt Enhancement → Image Generation → PPT → Video
+- Convert text into scenes  
+- Generate AI images  
+- Enhance prompts for better quality  
+- Export as PPT  
+- Export as video  
 
+---
 
-⸻
+## Workflow
 
-Key Features
-	•	Automatic scene segmentation
-	•	AI-based image generation
-	•	Prompt enhancement for better visuals
-	•	PPT export (slide per scene)
-	•	Video export (slideshow)
-	•	Sequential processing for stability
+```
+Text Input → Scene Segmentation → Prompt Enhancement → Image Generation → PPT → Video
+```
 
-⸻
+---
 
-Design Decisions
+## Design Choices (Important)
 
-Prompt Engineering Strategy
+### Prompt Engineering Strategy
 
-Raw text is enhanced before being sent to the image generator.
+Instead of sending raw text, the system enhances prompts before image generation.
 
-Prompt Enhancement
+### Prompt Enhancement
 
 Each prompt includes:
-	•	Cinematic composition
-	•	Lighting details
-	•	Camera effects
-	•	High-quality rendering instructions
 
-Rationale
+- Cinematic composition  
+- Lighting details  
+- Camera effects  
+- High-quality rendering instructions  
 
-This ensures consistent, high-quality, and professional outputs.
+### Reasoning
 
-⸻
+This ensures:
+- Better image quality  
+- Consistent results  
+- Professional output  
 
-Setup and Run
+---
 
+## Setup and Run
+
+```bash
 cd pitch-visualizer
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-Environment Variables
+### Environment Variables
 
-Create a .env file:
+Create a `.env` file:
 
+```
 GOOGLE_API_KEY=your_api_key
+```
 
-Install FFmpeg
+Do not commit `.env` to GitHub.
 
-Verify installation:
+---
 
+### Install FFmpeg
+
+Required for video export.
+
+Check installation:
+
+```bash
 ffmpeg -version
+```
 
-Run Server
+---
 
+### Run Server
+
+```bash
 uvicorn main:app --reload --port 8000
+```
 
 Open:
 http://localhost:8000
 
-⸻
+---
 
-System Architecture
+## System Architecture
 
+```
 User Input
    ↓
 Processing Layer
@@ -165,53 +201,54 @@ Generation Layer
 Export Layer
    ├── PPT Export
    └── Video Export
+```
 
+---
 
-⸻
+## Tech Stack
 
-Tech Stack
-	•	Python
-	•	FastAPI
-	•	HTML, CSS, JavaScript
-	•	Transformers (NLP)
-	•	Image generation APIs
-	•	python-pptx
-	•	FFmpeg
+- Python  
+- FastAPI  
+- HTML, CSS, JavaScript  
+- Transformers (NLP)  
+- Image generation APIs  
+- python-pptx  
+- FFmpeg  
 
-⸻
+---
 
-Installation (Combined)
+## Installation (Combined)
 
+```bash
 git clone https://github.com/satish05112003/Ai-sales-toolkit.git
 cd Ai-sales-toolkit
+```
 
-Set up each project separately.
+Set up each module separately.
 
-⸻
+---
 
-Usage
+## Usage
 
-Task 1
-	•	Input text
-	•	Detect emotion
-	•	Generate expressive speech
+### Empathy Engine
 
-Task 2
-	•	Input story
-	•	Generate storyboard
-	•	Download PPT or video
+- Input text  
+- Detect emotion  
+- Generate expressive speech  
 
-⸻
+### Pitch Visualizer
 
-Troubleshooting
-	•	Install required dependencies
-	•	Ensure FFmpeg is installed
-	•	Check .env file for API keys
-	•	Increase delay if rate limits occur
+- Input story  
+- Generate storyboard  
+- Download PPT or video  
 
-⸻
+---
 
+## Troubleshooting
 
-👉 demo GIF  
+- Ensure dependencies are installed  
+- Check FFmpeg installation  
+- Verify `.env` configuration  
+- Increase delay if API rate limits occur  
 
-Just say 👍
+---
