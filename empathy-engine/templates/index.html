@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empathy Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0c0c0f;
+      --surface:    #13131a;
+      --border:     rgba(255,255,255,0.07);
+      --text:       #e8e6f0;
+      --muted:      #6b6880;
+      --accent:     #b8a9ff;
+      --accent2:    #ff9de2;
+      --happy:      #ffe066;
+      --sad:        #7ab8f5;
+      --angry:      #ff6b6b;
+      --neutral:    #a0a0b8;
+      --excited:    #ff9de2;
+      --calm:       #7affd4;
+      --r:          18px;
+      --font-serif: 'DM Serif Display', Georgia, serif;
+      --font-mono:  'DM Mono', 'Courier New', monospace;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain overlay ──────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── Ambient glow ───────────────────────────────────────────────── */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      transition: background 1.5s ease, transform 1.5s ease;
+    }
+    .glow-orb-1 {
+      width: 600px; height: 600px;
+      top: -200px; left: -150px;
+      background: radial-gradient(circle, rgba(184,169,255,0.12) 0%, transparent 70%);
+    }
+    .glow-orb-2 {
+      width: 400px; height: 400px;
+      bottom: -100px; right: -100px;
+      background: radial-gradient(circle, rgba(255,157,226,0.08) 0%, transparent 70%);
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 52px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.02);
+    }
+    .logo-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(42px, 6vw, 72px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Main card ──────────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    .card-body { padding: 32px; }
+
+    /* ── Textarea ───────────────────────────────────────────────────── */
+    .field-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea::placeholder { color: var(--muted); }
+    textarea:focus {
+      border-color: rgba(184,169,255,0.3);
+      box-shadow: 0 0 0 3px rgba(184,169,255,0.07);
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .char-count.warn { color: var(--angry); }
+
+    /* ── Controls row ───────────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      align-items: flex-end;
+    }
+
+    .field-group { flex: 1; }
+
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6880' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: rgba(184,169,255,0.3); }
+    select option { background: #1a1a24; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      border-radius: 8px;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0c0c0f;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #cfc0ff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(184,169,255,0.25);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-icon { font-size: 16px; }
+
+    /* ── Divider ─────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    /* ── Loading state ───────────────────────────────────────────────── */
+    .loading {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(184,169,255,0.05);
+      border: 1px solid rgba(184,169,255,0.15);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .loading.visible { display: flex; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(184,169,255,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .loading-text { font-size: 13px; color: var(--accent); }
+
+    /* ── Result panel ────────────────────────────────────────────────── */
+    .result {
+      display: none;
+      animation: fadeUp 0.4s ease both;
+    }
+    .result.visible { display: block; }
+
+    /* ── Emotion badge ───────────────────────────────────────────────── */
+    .emotion-display {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .emotion-icon {
+      font-size: 48px;
+      line-height: 1;
+      filter: drop-shadow(0 0 16px currentColor);
+      transition: all 0.6s ease;
+    }
+
+    .emotion-info { flex: 1; }
+
+    .emotion-label {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 4px;
+      transition: color 0.6s ease;
+    }
+
+    .intensity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+      opacity: 0.7;
+    }
+
+    /* ── Params grid ─────────────────────────────────────────────────── */
+    .params-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .param-cell {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .param-cell .pk {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .param-cell .pv {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .param-cell .pv small {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── Audio player ────────────────────────────────────────────────── */
+    .audio-section label.field-label { margin-bottom: 10px; }
+
+    audio {
+      width: 100%;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    /* Custom audio wrapper */
+    .audio-wrapper {
+      position: relative;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .audio-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .audio-download:hover { color: var(--accent); }
+
+    /* ── Cache badge ─────────────────────────────────────────────────── */
+    .cache-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--calm);
+      letter-spacing: 0.04em;
+      margin-top: 12px;
+    }
+    .cache-badge.visible { display: flex; }
+
+    /* ── Error panel ─────────────────────────────────────────────────── */
+    .error-panel {
+      display: none;
+      padding: 14px 18px;
+      background: rgba(255,107,107,0.07);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 10px;
+      color: var(--angry);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .error-panel.visible { display: block; }
+
+    /* ── Emotion colours ─────────────────────────────────────────────── */
+    [data-emotion="happy"]   { color: var(--happy); }
+    [data-emotion="sad"]     { color: var(--sad); }
+    [data-emotion="angry"]   { color: var(--angry); }
+    [data-emotion="neutral"] { color: var(--neutral); }
+    [data-emotion="excited"] { color: var(--excited); }
+    [data-emotion="calm"]    { color: var(--calm); }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    /* ── Animations ──────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Ambient orbs -->
+  <div class="glow-orb glow-orb-1" id="orb1"></div>
+  <div class="glow-orb glow-orb-2" id="orb2"></div>
+
+  <div class="wrapper">
+    <!-- Header -->
+    <header>
+      <div class="logo-badge">
+        <span class="dot"></span>
+        Emotion-Aware TTS
+      </div>
+      <h1>The <em>Empathy</em><br>Engine</h1>
+      <p class="subtitle">Transform text into emotionally expressive speech</p>
+    </header>
+
+    <!-- Main card -->
+    <div class="card">
+      <div class="card-body">
+
+        <!-- Text input -->
+        <label class="field-label" for="textInput">Your Text</label>
+        <textarea
+          id="textInput"
+          placeholder="Type something with feeling… Happy news, a frustration, a quiet thought."
+          maxlength="2000"
+        ></textarea>
+        <div class="char-count" id="charCount">0 / 2000</div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <div class="field-group">
+            <label class="field-label" for="voiceSelect">Voice</label>
+            <select id="voiceSelect">
+              <option value="">System Default</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="generateBtn" onclick="generate()">
+            <span class="btn-icon">▶</span>
+            Generate Voice
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <span class="loading-text" id="loadingText">Detecting emotion…</span>
+        </div>
+
+        <!-- Error -->
+        <div class="error-panel" id="errorPanel"></div>
+
+        <!-- Result -->
+        <div class="result" id="result">
+          <div class="divider"></div>
+
+          <!-- Emotion display -->
+          <div class="emotion-display">
+            <div class="emotion-icon" id="emotionIcon">😐</div>
+            <div class="emotion-info">
+              <div class="emotion-label" id="emotionLabel" data-emotion="neutral">Neutral</div>
+              <span class="intensity-badge" id="intensityBadge" data-emotion="neutral">
+                ● medium intensity
+              </span>
+            </div>
+          </div>
+
+          <!-- Voice params -->
+          <div class="params-grid">
+            <div class="param-cell">
+              <div class="pk">Rate</div>
+              <div class="pv" id="paramRate">— <small>wpm</small></div>
+            </div>
+            <div class="param-cell">
+              <div class="pk">Volume</div>
+              <div class="pv" id="paramVol">—</div>
+            </div>
+            <div class="param-cell">
+              <div class="pk">Pitch</div>
+              <div class="pv" id="paramPitch">—</div>
+            </div>
+          </div>
+
+          <!-- Audio player -->
+          <div class="audio-section">
+            <label class="field-label">Generated Audio</label>
+            <div class="audio-wrapper">
+              <audio id="audioPlayer" controls preload="none"></audio>
+              <a class="audio-download" id="audioDownload" href="#" download>
+                ↓ Download MP3
+              </a>
+            </div>
+          </div>
+
+          <!-- Cache indicator -->
+          <div class="cache-badge" id="cacheBadge">
+            ⚡ Retrieved from cache — no re-processing needed
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>
+      Empathy Engine · Offline Emotion Model & Edge-TTS
+    </footer>
+  </div>
+
+  <script>
+    // ── Emotion metadata ─────────────────────────────────────────────────
+    const EMOTION_META = {
+      happy:   { icon: '😄', label: 'Happy' },
+      sad:     { icon: '😔', label: 'Sad' },
+      angry:   { icon: '😠', label: 'Angry' },
+      neutral: { icon: '😐', label: 'Neutral' },
+      excited: { icon: '🤩', label: 'Excited' },
+      calm:    { icon: '😌', label: 'Calm' },
+    };
+
+    // ── Load voices on startup ───────────────────────────────────────────
+    async function loadVoices() {
+      try {
+        const res  = await fetch('/voices');
+        const data = await res.json();
+        const sel  = document.getElementById('voiceSelect');
+        data.voices.forEach(v => {
+          const opt   = document.createElement('option');
+          opt.value   = v.id;
+          opt.textContent = v.name;
+          sel.appendChild(opt);
+        });
+      } catch (_) {
+        // Silently ignore — default voice still works
+      }
+    }
+
+    // ── Char counter ─────────────────────────────────────────────────────
+    const textInput = document.getElementById('textInput');
+    const charCount = document.getElementById('charCount');
+
+    textInput.addEventListener('input', () => {
+      const len = textInput.value.length;
+      charCount.textContent = `${len} / 2000`;
+      charCount.classList.toggle('warn', len > 1800);
+    });
+
+    // Allow Enter+Ctrl / Enter+Meta to submit
+    textInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) generate();
+    });
+
+    // ── Loading messages ─────────────────────────────────────────────────
+    const LOADING_MSGS = [
+      'Detecting emotion…',
+      'Calibrating voice parameters…',
+      'Synthesising speech…',
+      'Preparing audio…',
+    ];
+    let _loadingTimer = null;
+
+    function startLoading() {
+      const el = document.getElementById('loadingText');
+      let i = 0;
+      el.textContent = LOADING_MSGS[0];
+      _loadingTimer = setInterval(() => {
+        i = (i + 1) % LOADING_MSGS.length;
+        el.textContent = LOADING_MSGS[i];
+      }, 1200);
+    }
+
+    function stopLoading() {
+      clearInterval(_loadingTimer);
+    }
+
+    // ── Main generate function ───────────────────────────────────────────
+    async function generate() {
+      const text    = textInput.value.trim();
+      const voiceId = document.getElementById('voiceSelect').value;
+
+      // Hide previous state
+      hide('result');
+      hide('errorPanel');
+
+      if (!text) {
+        showError('Please enter some text before generating.');
+        return;
+      }
+
+      // Show loading
+      show('loading');
+      document.getElementById('generateBtn').disabled = true;
+      startLoading();
+
+      try {
+        const body = { text };
+        if (voiceId) body.voice_id = voiceId;
+
+        const res  = await fetch('/generate-voice', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          const msg = Array.isArray(data.detail)
+            ? data.detail.join(', ')
+            : (data.detail || 'Unknown error');
+          throw new Error(msg);
+        }
+
+        renderResult(data);
+
+      } catch (err) {
+        showError(err.message || 'Something went wrong. Check the server logs.');
+      } finally {
+        hide('loading');
+        stopLoading();
+        document.getElementById('generateBtn').disabled = false;
+      }
+    }
+
+    // ── Render result ────────────────────────────────────────────────────
+    function renderResult(data) {
+      const emotion   = data.emotion   || 'neutral';
+      const intensity = data.intensity || 'medium';
+      const meta      = EMOTION_META[emotion] || EMOTION_META.neutral;
+
+      // Icon + label
+      document.getElementById('emotionIcon').textContent        = meta.icon;
+      document.getElementById('emotionLabel').textContent       = meta.label;
+      document.getElementById('emotionLabel').dataset.emotion   = emotion;
+      document.getElementById('intensityBadge').textContent     = `● ${intensity} intensity`;
+      document.getElementById('intensityBadge').dataset.emotion = emotion;
+
+      // Params
+      document.getElementById('paramRate').innerHTML =
+        `${data.voice_params.rate} <small>wpm</small>`;
+      document.getElementById('paramVol').textContent =
+        `${(data.voice_params.volume * 100).toFixed(0)}%`;
+      document.getElementById('paramPitch').textContent =
+        capitalize(data.voice_params.pitch_label || '—');
+
+      // Audio
+      const audio = document.getElementById('audioPlayer');
+      audio.src   = data.audio_url + '?t=' + Date.now(); // Cache-bust for same-file reload
+      audio.load();
+      audio.play().catch(() => {}); // Auto-play (may be blocked by browser policy)
+
+      // Download link
+      const dl = document.getElementById('audioDownload');
+      dl.href     = data.audio_url;
+      dl.download = data.audio_url.split('/').pop();
+
+      // Cache badge
+      document.getElementById('cacheBadge').classList.toggle('visible', !!data.cached);
+
+      // Ambient orb colours based on emotion
+      updateOrbs(emotion);
+
+      show('result');
+    }
+
+    // ── Update ambient orbs ──────────────────────────────────────────────
+    const ORB_COLOURS = {
+      happy:   ['rgba(255,224,102,0.14)', 'rgba(255,224,102,0.08)'],
+      sad:     ['rgba(122,184,245,0.14)', 'rgba(122,184,245,0.08)'],
+      angry:   ['rgba(255,107,107,0.14)', 'rgba(255,107,107,0.08)'],
+      neutral: ['rgba(184,169,255,0.12)', 'rgba(255,157,226,0.08)'],
+      excited: ['rgba(255,157,226,0.18)', 'rgba(255,224,102,0.10)'],
+      calm:    ['rgba(122,255,212,0.12)', 'rgba(122,184,245,0.08)'],
+    };
+
+    function updateOrbs(emotion) {
+      const colours = ORB_COLOURS[emotion] || ORB_COLOURS.neutral;
+      document.getElementById('orb1').style.background =
+        `radial-gradient(circle, ${colours[0]} 0%, transparent 70%)`;
+      document.getElementById('orb2').style.background =
+        `radial-gradient(circle, ${colours[1]} 0%, transparent 70%)`;
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function show(id)  { document.getElementById(id).classList.add('visible'); }
+    function hide(id)  { document.getElementById(id).classList.remove('visible'); }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function showError(msg) {
+      const el = document.getElementById('errorPanel');
+      el.textContent = '⚠ ' + msg;
+      show('errorPanel');
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    loadVoices();
+  </script>
+</body>
+</html>

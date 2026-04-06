@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Storyboard {{ session_id }} — Pitch Visualizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --border: rgba(255,255,255,0.08);
+      --accent: #e8c97d; --text: #f0eeea; --text-dim: rgba(240,238,234,0.45);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; padding: 40px 24px; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: 36px; text-align: center; margin-bottom: 8px; }
+    .sub { text-align: center; font-size: 13px; color: var(--text-dim); font-family: 'DM Mono', monospace; margin-bottom: 48px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .panel-num { padding: 12px 16px 8px; font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .panel img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .panel-caption { padding: 16px; font-family: 'DM Serif Display', serif; font-size: 15px; line-height: 1.55; }
+    .back { display: block; text-align: center; margin-top: 48px; color: var(--accent); font-size: 14px; }
+    @media print { body { background: #fff; color: #000; } .panel { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <h1>Storyboard</h1>
+  <p class="sub">Session {{ session_id }} · {{ panels|length }} scenes</p>
+  <div class="grid">
+    {% for panel in panels %}
+    <div class="panel">
+      <div class="panel-num">Scene {{ loop.index }}</div>
+      <img src="{{ panel.image }}" alt="Scene {{ loop.index }}" />
+      <div class="panel-caption">{{ panel.caption }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="display:flex; justify-content:center; gap:16px; margin-top:48px;">
+    <button onclick="window.location.href='/download-ppt'" 
+        style="cursor:pointer; padding:12px 24px; border-radius:10px; background:#6c63ff; color:white; border:none; font-family:'Syne',sans-serif; font-weight:600; font-size:14px; box-shadow:0 4px 15px rgba(108,99,255,0.3);">
+        📊 Download PPT
+    </button>
+    <button onclick="window.location.href='/download-video'" 
+        style="cursor:pointer; padding:12px 24px; border-radius:10px; background:#ff7a18; color:white; border:none; font-family:'Syne',sans-serif; font-weight:600; font-size:14px; box-shadow:0 4px 15px rgba(255,122,24,0.3);">
+        🎬 Download Video
+    </button>
+  </div>
+
+  <a class="back" href="/">← Generate a new storyboard</a>
+
+</body>
+</html>

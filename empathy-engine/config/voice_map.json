@@ -1,0 +1,100 @@
+{
+  "_comment": "Empathy Engine — Voice Parameter Map",
+  "_note": "Each emotion defines base voice parameters and intensity scaling deltas.",
+
+  "emotions": {
+    "happy": {
+      "base": {
+        "rate": 185,
+        "volume": 0.85,
+        "pitch_label": "high"
+      },
+      "intensity_delta": {
+        "low":    { "rate":  0, "volume":  0.0 },
+        "medium": { "rate": 15, "volume":  0.05 },
+        "high":   { "rate": 30, "volume":  0.10 }
+      },
+      "description": "Upbeat, energetic, fast-paced"
+    },
+
+    "sad": {
+      "base": {
+        "rate": 130,
+        "volume": 0.60,
+        "pitch_label": "low"
+      },
+      "intensity_delta": {
+        "low":    { "rate":   0, "volume":  0.0 },
+        "medium": { "rate": -10, "volume": -0.05 },
+        "high":   { "rate": -20, "volume": -0.10 }
+      },
+      "description": "Slow, quiet, heavy delivery"
+    },
+
+    "angry": {
+      "base": {
+        "rate": 195,
+        "volume": 0.95,
+        "pitch_label": "high"
+      },
+      "intensity_delta": {
+        "low":    { "rate":  0, "volume":  0.0 },
+        "medium": { "rate": 10, "volume":  0.03 },
+        "high":   { "rate": 20, "volume":  0.05 }
+      },
+      "description": "Forceful, clipped, loud"
+    },
+
+    "neutral": {
+      "base": {
+        "rate": 160,
+        "volume": 0.75,
+        "pitch_label": "medium"
+      },
+      "intensity_delta": {
+        "low":    { "rate": 0, "volume": 0.0 },
+        "medium": { "rate": 0, "volume": 0.0 },
+        "high":   { "rate": 0, "volume": 0.0 }
+      },
+      "description": "Calm, balanced, even-keeled"
+    },
+
+    "excited": {
+      "base": {
+        "rate": 210,
+        "volume": 0.90,
+        "pitch_label": "high"
+      },
+      "intensity_delta": {
+        "low":    { "rate":  0, "volume":  0.0 },
+        "medium": { "rate": 15, "volume":  0.05 },
+        "high":   { "rate": 30, "volume":  0.10 }
+      },
+      "description": "Very fast, enthusiastic, energetic"
+    },
+
+    "calm": {
+      "base": {
+        "rate": 145,
+        "volume": 0.70,
+        "pitch_label": "low"
+      },
+      "intensity_delta": {
+        "low":    { "rate": 0, "volume":  0.0 },
+        "medium": { "rate": 5, "volume": -0.05 },
+        "high":   { "rate": 5, "volume": -0.08 }
+      },
+      "description": "Slow, soothing, tranquil"
+    }
+  },
+
+  "rate_bounds": {
+    "min": 80,
+    "max": 300
+  },
+
+  "volume_bounds": {
+    "min": 0.20,
+    "max": 1.00
+  }
+}

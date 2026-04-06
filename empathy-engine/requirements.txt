@@ -1,0 +1,21 @@
+# Empathy Engine — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web Framework ─────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+jinja2==3.1.4
+python-multipart==0.0.9
+
+# ── AI / ML ───────────────────────────────────────────────────────────────────
+transformers==4.41.2
+torch        # CPU-only build; replace with torch-cu121 for GPU
+ # Required by some HuggingFace tokenizers
+
+# ── Text-to-Speech ────────────────────────────────────────────────────────────
+edge-tts==7.0.0
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+python-dotenv==1.0.1
+pydantic>=2.6.0
+pydub==0.25.1

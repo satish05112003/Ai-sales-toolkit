@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pitch Visualizer — From Words to Storyboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a24;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #e8c97d;
+      --accent2: #7d9ce8;
+      --accent3: #e87d9c;
+      --text: #f0eeea;
+      --text-dim: rgba(240, 238, 234, 0.45);
+      --radius: 14px;
+      --film-w: 260px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: .6;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    nav a {
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all .2s;
+    }
+
+    nav a:hover {
+      color: var(--text);
+      border-color: var(--border);
+      background: var(--surface);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 40px;
+      position: relative;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 480px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: rgba(232, 201, 125, 0.1);
+      border: 1px solid rgba(232, 201, 125, 0.25);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .badge span {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(1.5)
+      }
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(36px, 6vw, 68px);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--text-dim);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── Input Section ── */
+    .input-section {
+      max-width: 900px;
+      margin: 56px auto 0;
+      padding: 0 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .char-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px;
+      line-height: 1.7;
+      padding: 20px 24px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    textarea:focus {
+      border-color: rgba(232, 201, 125, 0.4);
+      box-shadow: 0 0 0 3px rgba(232, 201, 125, 0.07);
+    }
+
+    textarea::placeholder {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* ── Style picker ── */
+    .style-section {
+      margin-top: 24px;
+    }
+
+    .style-label {
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .style-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .style-btn {
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-dim);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .style-btn:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text);
+    }
+
+    .style-btn.active {
+      background: rgba(232, 201, 125, 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Submit button ── */
+    .submit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 28px;
+      gap: 16px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .btn-generate {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, var(--accent), #d4b05a);
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 24px rgba(232, 201, 125, 0.25);
+    }
+
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(232, 201, 125, 0.35);
+    }
+
+    .btn-generate:active {
+      transform: translateY(0);
+    }
+
+    .btn-generate:disabled {
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    .btn-icon {
+      font-size: 18px;
+    }
+
+    /* ── Loading state ── */
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+    }
+
+    #loading.active {
+      display: block;
+    }
+
+    .film-strip {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .frame {
+      width: 52px;
+      height: 68px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .frame::before,
+    .frame::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: repeating-linear-gradient(90deg, transparent 0, transparent 6px, var(--bg) 6px, var(--bg) 10px);
+    }
+
+    .frame::before {
+      top: 0;
+    }
+
+    .frame::after {
+      bottom: 0;
+    }
+
+    .frame .shimmer {
+      position: absolute;
+      inset: 10px;
+      background: linear-gradient(110deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 2px;
+    }
+
+    .frame:nth-child(2) .shimmer {
+      animation-delay: .15s;
+    }
+
+    .frame:nth-child(3) .shimmer {
+      animation-delay: .3s;
+    }
+
+    .frame:nth-child(4) .shimmer {
+      animation-delay: .45s;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .loading-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .loading-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+    }
+
+    #progress-log {
+      margin-top: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    #progress-log .log-line {
+      padding: 3px 0;
+    }
+
+    #progress-log .log-line.done {
+      color: #7de8a0;
+    }
+
+    /* ── Storyboard output ── */
+    #storyboard {
+      display: none;
+    }
+
+    #storyboard.active {
+      display: block;
+    }
+
+    .sb-header {
+      text-align: center;
+      padding: 64px 24px 40px;
+    }
+
+    .sb-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .sb-meta {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+      margin-top: 16px;
+    }
+
+    .sb-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Film-strip panels */
+    .panels-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .panels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--film-w), 1fr));
+      gap: 28px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+      animation: panelIn .5s both;
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-num {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .scene-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .panel-img-wrap {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+
+    .panel-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s;
+    }
+
+    .panel:hover .panel-img-wrap img {
+      transform: scale(1.04);
+    }
+
+    /* Perforations top/bottom */
+    .perfs {
+      height: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 4px;
+    }
+
+    .perf {
+      width: 8px;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .panel-caption {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .panel-prompt-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+      transition: color .15s;
+    }
+
+    .panel-prompt-toggle:hover {
+      color: var(--accent);
+    }
+
+    .panel-prompt {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .panel-prompt.open {
+      display: block;
+    }
+
+    /* ── Action row ── */
+    .sb-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding-bottom: 40px;
+    }
+
+    .btn-action {
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action.primary {
+      background: var(--accent);
+      color: #0a0a0f;
+      border-color: var(--accent);
+    }
+
+    .btn-action.secondary {
+      background: transparent;
+      color: var(--text-dim);
+    }
+
+    .btn-action:hover {
+      filter: brightness(1.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── Error toast ── */
+    #error-toast {
+      display: none;
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a1218;
+      border: 1px solid #7d2d3e;
+      color: #f87;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-size: 14px;
+      z-index: 100;
+    }
+
+    #error-toast.show {
+      display: block;
+      animation: toastIn .3s;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0)
+      }
+    }
+
+    /* ── Responsive ── */
+    @media(max-width:640px) {
+      header {
+        padding: 20px 20px;
+      }
+
+      .card {
+        padding: 24px 18px;
+      }
+
+      .submit-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-generate {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🎬</div>
+      <div>
+        <div class="logo-text">Pitch Visualizer</div>
+        <div class="logo-sub">Words → Storyboard</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#" onclick="resetUI()">New</a>
+      <a href="https://github.com" target="_blank">Docs</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="badge"><span></span> AI-Powered Storyboarding</div>
+    <h1>Turn your <em>narrative</em> into a visual storyboard</h1>
+    <p>Write your pitch, story, or idea in plain English. We'll break it into scenes and generate cinematic visuals.</p>
+  </div>
+
+  <!-- Input Section -->
+  <div class="input-section" id="input-section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Your Narrative</span>
+        <span class="char-count" id="char-count">0 / 1000</span>
+      </div>
+
+      <textarea id="story-input"
+        placeholder="A startup founder sat alone in a dimly lit office, watching sales numbers plummet. He knew a pivot was the only way forward. After weeks of doubt, he made the call that changed everything. The product launched to thunderous applause, and the team celebrated their unlikely victory."
+        maxlength="1000"></textarea>
+
+      <div class="style-section">
+        <span class="style-label">Visual Style</span>
+        <div class="style-options" id="style-options">
+          {% for style in styles %}
+          <button class="style-btn {% if loop.first %}active{% endif %}" data-style="{{ style }}"
+            onclick="selectStyle(this)">
+            {% if style == 'photorealistic' %}📷{% elif style == 'cinematic' %}🎬{% elif style == 'cartoon' %}🎨{% elif
+            style == 'digital_art' %}🖌️{% else %}✦{% endif %}
+            {{ style.replace('_', ' ').title() }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+
+      <div class="submit-row">
+        <p class="hint">Tip: 3–5 sentences work best. Each sentence becomes a scene.</p>
+        <button class="btn-generate" id="gen-btn" onclick="generateStoryboard()">
+          <span class="btn-icon">✦</span>
+          Generate Storyboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="film-strip">
+      <div class="frame">
+        <div class="shimmer"></div>
+      </div>
+      <div class="frame">
+        <div class="shimmer"></div>
+      </div>
+      <div class="frame">
+        <div class="shimmer"></div>
+      </div>
+      <div class="frame">
+        <div class="shimmer"></div>
+      </div>
+    </div>
+    <div class="loading-text">Generating your storyboard…</div>
+    <div class="loading-sub" id="loading-step">Segmenting narrative into scenes</div>
+    <div id="progress-log"></div>
+  </div>
+
+  <!-- Storyboard -->
+  <div id="storyboard">
+    <div class="sb-header">
+      <h2>Your Storyboard</h2>
+      <div class="sb-meta">
+        <span>🎬 <span id="meta-scenes">0 scenes</span></span>
+        <span>🎨 <span id="meta-style">photorealistic</span></span>
+        <span>⏱ <span id="meta-time">—</span></span>
+      </div>
+    </div>
+
+    <div class="panels-wrap">
+      <div class="panels-grid" id="panels-grid"></div>
+    </div>
+
+    <div class="sb-actions">
+      <button class="btn-action secondary" onclick="resetUI()">
+        ↩ New Storyboard
+      </button>
+      <button class="btn-action primary" onclick="window.print()">
+        ⬇ Export PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Error toast -->
+  <div id="error-toast"></div>
+
+  <script>
+    // Global timers
+    let timeLeft = 0;
+    let timerInterval = null;
+
+    const textarea    = document.getElementById('story-input');
+    const charCount   = document.getElementById('char-count');
+    const genBtn      = document.getElementById('gen-btn');
+    const loadingEl   = document.getElementById('loading');
+    const statusLabel = document.getElementById('status');
+    const timerLabel  = document.getElementById('timer');
+    const storyboardEl= document.getElementById('storyboard');
+    const panelsGrid  = document.getElementById('panels-grid');
+    const progressLog = document.getElementById('progress-log');
+
+    let selectedStyle = 'photorealistic';
+
+    // ── Char counter ──
+    textarea.addEventListener('input', () => {
+      charCount.textContent = `${textarea.value.length} / 1000`;
+    });
+
+    // ── Style selection ──
+    function selectStyle(btn) {
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedStyle = btn.dataset.style;
+    }
+
+    // ── Log helper ──
+    function log(msg, done = false) {
+      const line = document.createElement('div');
+      line.className = 'log-line' + (done ? ' done' : '');
+      line.textContent = (done ? '✓ ' : '→ ') + msg;
+      progressLog.appendChild(line);
+      progressLog.scrollTop = progressLog.scrollHeight;
+    }
+
+    // ── Main generate ──
+    async function generateStoryboard() {
+      const text = textarea.value.trim();
+      if (!text) { showError('Please enter your narrative text first.'); return; }
+
+      // Estimate countdown (3 sec per sentence, default to 3 sentences)
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      const estimatedScenes = Math.min(sentences.length, 3); // Current backend limit
+      timeLeft = estimatedScenes * 4; // 4s per scene is safer (3s sleep + 1s generate)
+      
+      // Switch to loading view
+      document.getElementById('input-section').style.display = 'none';
+      storyboardEl.classList.remove('active');
+      loadingEl.classList.add('active');
+      genBtn.disabled = true;
+
+      statusLabel.innerText = "🎬 Starting generation...";
+      
+      // Timer Interval (Step 3)
+      timerInterval = setInterval(() => {
+          timerLabel.innerText = `⏳ Estimated time left: ${timeLeft}s`;
+          timeLeft--;
+
+          if (timeLeft <= 0) {
+              timerLabel.innerText = "Finalizing your masterpiece...";
+              clearInterval(timerInterval);
+          }
+      }, 1000);
+
+      try {
+        const resp = await fetch('/generate-storyboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, style: selectedStyle }),
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.detail || 'Server error');
+        }
+
+        const data = await resp.json();
+        clearInterval(timerInterval);
+        
+        statusLabel.innerText = "✅ Storyboard ready!";
+        timerLabel.innerText = "";
+        
+        // Render
+        renderStoryboard(data);
+
+      } catch (err) {
+        clearInterval(stepTimer);
+        loadingEl.classList.remove('active');
+        document.getElementById('input-section').style.display = '';
+        genBtn.disabled = false;
+        showError(err.message || 'Something went wrong. Please try again.');
+      }
+    }
+
+    // ── Render panels ──
+  async function renderStoryboard(data) {
+    const totalScenes = data.total_scenes || data.images.length;
+    panelsGrid.innerHTML = '';
+
+    for (let i = 0; i < data.images.length; i++) {
+      // Simulate live rendering progress (Step 4)
+      statusLabel.innerText = `🖼️ Rendering scene ${i + 1} of ${totalScenes}...`;
+      
+      const imgSrc = data.images[i];
+      const panel = document.createElement('div');
+      panel.className = 'panel';
+      panel.style.animationDelay = `${i * 0.15}s`;
+
+      const perfsTop = buildPerfs();
+      const num = document.createElement('div');
+      num.className = 'panel-num';
+      num.innerHTML = `<div class="scene-dot"></div> Scene ${i + 1}`;
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'panel-img-wrap';
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      imgWrap.appendChild(img);
+
+      const perfsBot = buildPerfs();
+      const body = document.createElement('div');
+      body.className = 'panel-body';
+      body.innerHTML = `<div class="panel-caption">${data.captions[i] || ''}</div>`;
+
+      const promptToggle = document.createElement('div');
+      promptToggle.className = 'panel-prompt-toggle';
+      promptToggle.innerHTML = '🔍 View AI prompt';
+      const promptBox = document.createElement('div');
+      promptBox.className = 'panel-prompt';
+      promptBox.textContent = data.prompts[i] || '';
+
+      promptToggle.onclick = () => {
+        promptBox.classList.toggle('open');
+        promptToggle.innerHTML = promptBox.classList.contains('open') ? '🔼 Hide prompt' : '🔍 View AI prompt';
+      };
+
+      body.append(promptToggle, promptBox);
+      panel.append(perfsTop, num, imgWrap, perfsBot, body);
+      panelsGrid.appendChild(panel);
+      
+      // Wait slightly between each panel for professional staggered reveal
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    statusLabel.innerText = "✅ Storyboard fully generated!";
+    
+    // Meta
+    document.getElementById('meta-scenes').textContent = `${data.images.length} scenes`;
+    document.getElementById('meta-style').textContent = data.style;
+
+    storyboardEl.classList.add('active');
+  }
+
+    function buildPerfs() {
+      const row = document.createElement('div');
+      row.className = 'perfs';
+      for (let i = 0; i < 10; i++) {
+        const p = document.createElement('div');
+        p.className = 'perf';
+        row.appendChild(p);
+      }
+      return row;
+    }
+
+    // ── Reset ──
+    function resetUI() {
+      storyboardEl.classList.remove('active');
+      loadingEl.classList.remove('active');
+      document.getElementById('input-section').style.display = '';
+      genBtn.disabled = false;
+    }
+
+    // ── Error toast ──
+    function showError(msg) {
+      const toast = document.getElementById('error-toast');
+      toast.textContent = '⚠ ' + msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+  </script>
+</body>
+
+</html>
